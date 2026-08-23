@@ -3,60 +3,599 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2d3748">
-  <meta name="description" content="Mow Masters of Edmond - Professional lawn care management">
+  <meta name="theme-color" content="#3E5C2C">
   <title>Mow Masters of Edmond</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%232d3748' width='180' height='180'/><text x='50%' y='50%' font-size='120' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle'>MM</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%232d3748' width='180' height='180'/><text x='50%' y='50%' font-size='120' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle'>MM</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #ffffff;
-      color: #1a202c;
-      line-height: 1.5;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #F2EDDD;
+      color: #2A2620;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
     #root {
       width: 100%;
-      min-height: 100vh;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      background: #F2EDDD;
+    }
+    .app {
+      width: 100%;
+      max-width: 460px;
       display: flex;
       flex-direction: column;
+      height: 100vh;
+      background: #F2EDDD;
     }
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: #1a202c;
-        color: #e2e8f0;
-      }
+    .header {
+      padding: 18px 18px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #F2EDDD;
+    }
+    .header-title {
+      font-family: 'Roboto Slab', serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #2D4222;
+    }
+    .content {
+      flex: 1;
+      padding: 8px 18px 90px;
+      overflow-y: auto;
+      background: #F2EDDD;
+    }
+    .tabs {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 460px;
+      background: #FBF8F0;
+      border-top: 1px solid #DDD3BC;
+      display: flex;
+      padding: 6px 4px;
+      gap: 0;
+    }
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 8px 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #A69A82;
+      font-size: 10px;
+      transition: color 0.2s;
+    }
+    .tab-btn.active {
+      color: #3E5C2C;
+      font-weight: 600;
+    }
+    .tab-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* Mow Stripes */
+    .mow-stripes {
+      height: 54px;
+      background: repeating-linear-gradient(115deg, #3E5C2C 0px, #3E5C2C 26px, #4A6B35 26px, #4A6B35 52px);
+      border-radius: 14px 14px 0 0;
+    }
+
+    /* Route Card */
+    .route-card {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #DDD3BC;
+      margin-bottom: 18px;
+    }
+    .route-header {
+      background: #2D4222;
+      padding: 18px 20px;
+      color: #F2EDDD;
+    }
+    .route-title {
+      font-family: 'Roboto Slab', serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .route-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    /* Card */
+    .card {
+      background: #FBF8F0;
+      border: 1px solid #DDD3BC;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .card-title {
+      font-family: 'Roboto Slab', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2A2620;
+      margin-bottom: 12px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .stat-box {
+      background: #FBF8F0;
+      border: 1px solid #DDD3BC;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #8A7F6E;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 600;
+      color: #2A2620;
+    }
+    .stat-value.green {
+      color: #5C7A3E;
+    }
+
+    /* Client List */
+    .client-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #E9E1CC;
+    }
+    .client-item:last-child {
+      border-bottom: none;
+    }
+    .client-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .client-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: #2A2620;
+      flex: 1;
+    }
+    .client-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5C7A3E;
+      white-space: nowrap;
+    }
+    .client-detail {
+      font-size: 11px;
+      color: #5C5346;
+      margin-top: 2px;
+    }
+    .badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .badge.active { background: #EAF0E1; color: #5C7A3E; }
+    .badge.as-needed { background: #FBF0DC; color: #B58A2C; }
+    .badge.inactive { background: #F5F3F0; color: #8A7F6E; }
+    .badge.lost { background: #FDF5F3; color: #A65438; }
+
+    /* Login */
+    .login-box {
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .login-card {
+      background: #FBF8F0;
+      border: 1px solid #DDD3BC;
+      border-radius: 10px;
+      padding: 40px 24px;
+      max-width: 360px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .login-title {
+      font-family: 'Roboto Slab', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #2A2620;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #2A2620;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #DDD3BC;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: white;
+      color: #2A2620;
+    }
+    .form-input::placeholder {
+      color: #8A7F6E;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #3E5C2C;
+      box-shadow: 0 0 0 3px rgba(62, 92, 44, 0.1);
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Roboto Slab', serif;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+    .btn-primary {
+      background: #3E5C2C;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #2D4222;
+    }
+    .toggle-link {
+      text-align: center;
+      font-size: 12px;
+      color: #5C5346;
+    }
+    .toggle-link button {
+      background: none;
+      border: none;
+      color: #3E5C2C;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .error { color: #A32D2D; font-size: 12px; margin-bottom: 12px; }
+    .success { color: #5C7A3E; font-size: 12px; margin-bottom: 12px; }
+
+    .settings-row {
+      padding: 12px 0;
+      border-bottom: 1px solid #E9E1CC;
+      display: flex;
+      justify-content: space-between;
+    }
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+    .settings-label {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .settings-value {
+      font-size: 12px;
+      color: #5C5346;
+    }
+    .btn-danger {
+      width: 100%;
+      padding: 12px;
+      background: #A32D2D;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Roboto Slab', serif;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-danger:hover {
+      background: #7A1F1F;
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- Storage Shim -->
-  <script src="storage-shim.js"></script>
-
-  <!-- Auth Module -->
-  <script src="auth-module.js"></script>
-
-  <!-- App -->
-  <script src="app.js"></script>
-
-  <!-- Service Worker Registration -->
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').catch(() => {
-        console.log('Service Worker registration failed (offline features unavailable)');
-      });
-    }
+const COLORS = {
+  deep_green: '#3E5C2C',
+  medium_green: '#5C7A3E',
+  dark_sage: '#2D6E5C',
+  dark_bg: '#2D4222',
+  text_primary: '#2A2620',
+  text_muted: '#8A7F6E',
+};
+
+const SEED_CLIENTS = [
+  { id: "greg", name: "Greg Weides", address: "15801 Petaluma Pl", day: "Thursday", time: "5:00-6:30 PM", price: 65, status: "active", phone: "469-407-3440" },
+  { id: "corinne", name: "Corinne Taylor-Davis", address: "321 Antelope Trl", day: "Thursday", time: "6:45-7:45 PM", price: 65, status: "active" },
+  { id: "haley", name: "Haley Ackerman", address: "1012 Earl A Rodkey Dr", day: "Wednesday", time: "5:45-7:15 PM", price: 40, status: "active" },
+  { id: "holly", name: "Holly Huntley", address: "2408 Fairfield Dr", day: "Tuesday", time: "6:15-7:00 PM", price: 55, status: "active" },
+  { id: "rionna", name: "Rionna Allen", address: "801 Rolling Hills Ter", day: "Tuesday", time: "5:00-6:00 PM", price: 50, status: "active" },
+  { id: "jose", name: "Jose Gonzalez", address: "400 Abilene Ave", day: "Tuesday", time: "5:00-6:00 PM", price: 35, status: "active" },
+  { id: "evan-peyton", name: "Evan / Peyton Flury", address: "701 Cherryvale", day: "Wednesday", time: "5:00-5:30 PM", price: 40, status: "active" },
+  { id: "cheyenne", name: "Cheyenne Bouseman", address: "624 NW 187th Ct", day: "Wednesday", time: "5:00-6:20 PM", price: 60, status: "active" },
+  { id: "miriam", name: "Miriam Conrady", address: "2817 Old Hickory Dr", day: "Wednesday", time: "6:35-8:15 PM", price: 45, status: "active" },
+  { id: "angela", name: "Angela Kuhlman", address: "1317 SW 25th St", day: "Friday", time: "6:00-7:00 PM", price: 55, status: "active" },
+  { id: "cody", name: "Cody Ribble", address: "1616 Exeter Ct", day: "Monday", time: "5:00-5:45 PM", price: 55, status: "active", note: "Solo Monday route" },
+  { id: "erin", name: "Erin Seapy", address: "724 Howard Ct", day: "As-needed", time: "TBD", price: 45, status: "as-needed" },
+  { id: "kaelyn", name: "Kaelyn Gray", address: "3112 Kelsey Drive", day: "As-needed", time: "TBD", price: null, status: "as-needed" },
+  { id: "stuart", name: "Stuart Hansen", address: "9881 Abbington Circle", day: "—", time: "—", price: 70, status: "inactive" },
+  { id: "tara", name: "Tara Bolton", address: "1229 Whitehurst Ln", day: "—", time: "—", price: 115, status: "inactive" },
+  { id: "frances", name: "Frances Boggs", address: "2621 N Lincoln Ave", day: "—", time: "—", price: 50, status: "inactive" },
+  { id: "rianna", name: "Rianna Hardwick", address: "2908 Zachary Pl", day: "—", time: "—", price: null, status: "lost" },
+  { id: "ashlyn", name: "Ashlyn Cox", address: "—", day: "—", time: "—", price: 65, status: "lost" },
+  { id: "jennifer", name: "Jennifer Wickware", address: "—", day: "—", time: "—", price: 45, status: "inactive" }
+];
+
+const ROUTE_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+let state = {
+  user: null,
+  tab: 'dashboard'
+};
+
+function fmt(num) {
+  if (num === null || num === undefined) return '$0.00';
+  return '$' + parseFloat(num).toFixed(2);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+function getClients() {
+  const data = localStorage.getItem('mow-clients');
+  return data ? JSON.parse(data) : SEED_CLIENTS;
+}
+
+function saveClients(clients) {
+  localStorage.setItem('mow-clients', JSON.stringify(clients));
+}
+
+function getTodaysRoute() {
+  const today = ROUTE_DAYS[new Date().getDay() - 1];
+  if (!today) return { day: null, clients: [] };
+
+  const clients = getClients();
+  const todaysClients = clients.filter(c => c.day === today && (c.status === 'active' || c.status === 'as-needed'));
+  return { day: today, clients: todaysClients };
+}
+
+function renderLoginPage() {
+  return `
+    <div class="login-box">
+      <div class="login-card">
+        <h1 class="login-title">Mow Masters of Edmond</h1>
+        <div id="auth-messages"></div>
+        <form id="auth-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="password" placeholder="Password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </form>
+        <div class="toggle-link">
+          Don't have an account? <button type="button" onclick="toggleAuthMode()">Sign up</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDashboard() {
+  const clients = getClients();
+  const route = getTodaysRoute();
+  const activeClients = clients.filter(c => c.status === 'active');
+  const weeklyRevenue = activeClients.reduce((sum, c) => sum + (c.price || 0), 0);
+
+  return `
+    <div class="route-card">
+      <div class="mow-stripes"></div>
+      <div class="route-header">
+        <div class="route-title">${route.day ? route.day + "'s Route" : "No route today"}</div>
+        <div class="route-subtitle">${route.clients.length} stop${route.clients.length === 1 ? '' : 's'}</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">Active Clients</div>
+        <div class="stat-value">${activeClients.length}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Weekly Revenue</div>
+        <div class="stat-value green">${fmt(weeklyRevenue)}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Active Clients</div>
+      <div>
+        ${activeClients.map(c => `
+          <div class="client-item">
+            <div class="client-row">
+              <div class="client-name">${escapeHtml(c.name)}</div>
+              <div class="client-price">${fmt(c.price)}</div>
+            </div>
+            <div class="client-detail">${escapeHtml(c.day)} ${escapeHtml(c.time)}</div>
+            <span class="badge ${c.status}">${c.status}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderClients() {
+  const clients = getClients();
+  return `
+    <div class="card">
+      <div class="card-title">All Clients</div>
+      <div>
+        ${clients.map(c => `
+          <div class="client-item">
+            <div class="client-row">
+              <div class="client-name">${escapeHtml(c.name)}</div>
+              ${c.price ? `<div class="client-price">${fmt(c.price)}</div>` : ''}
+            </div>
+            <div class="client-detail">${escapeHtml(c.address)}</div>
+            ${c.phone ? `<div class="client-detail">📱 ${escapeHtml(c.phone)}</div>` : ''}
+            <span class="badge ${c.status}">${c.status}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderSettings() {
+  return `
+    <div class="card">
+      <div class="card-title">Account</div>
+      <div class="settings-row">
+        <span class="settings-label">Email</span>
+        <span class="settings-value">${escapeHtml(state.user?.email || 'User')}</span>
+      </div>
+    </div>
+    <div class="card">
+      <button class="btn-danger" onclick="logout()">Sign Out</button>
+    </div>
+  `;
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  if (!email || !password) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  state.user = { email, id: 'user-' + Date.now() };
+  localStorage.setItem('mow-auth', JSON.stringify(state.user));
+  if (!localStorage.getItem('mow-clients')) {
+    saveClients(SEED_CLIENTS);
+  }
+  render();
+}
+
+function logout() {
+  localStorage.removeItem('mow-auth');
+  state.user = null;
+  render();
+}
+
+function toggleAuthMode() {}
+
+function switchTab(tabName) {
+  state.tab = tabName;
+  render();
+}
+
+function render() {
+  const root = document.getElementById('root');
+
+  if (!state.user) {
+    root.innerHTML = renderLoginPage();
+    return;
+  }
+
+  let contentHTML = '';
+  if (state.tab === 'dashboard') {
+    contentHTML = renderDashboard();
+  } else if (state.tab === 'clients') {
+    contentHTML = renderClients();
+  } else if (state.tab === 'settings') {
+    contentHTML = renderSettings();
+  }
+
+  root.innerHTML = `
+    <div class="app">
+      <div class="header">
+        <div style="font-size: 20px;">✂️</div>
+        <div class="header-title">Mow Masters of Edmond</div>
+      </div>
+      <div class="content">
+        ${contentHTML}
+      </div>
+      <div class="tabs">
+        <button class="tab-btn ${state.tab === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')">
+          <div class="tab-icon">☀️</div>
+          <div>Dashboard</div>
+        </button>
+        <button class="tab-btn ${state.tab === 'clients' ? 'active' : ''}" onclick="switchTab('clients')">
+          <div class="tab-icon">👥</div>
+          <div>Clients</div>
+        </button>
+        <button class="tab-btn ${state.tab === 'settings' ? 'active' : ''}" onclick="switchTab('settings')">
+          <div class="tab-icon">⚙️</div>
+          <div>Settings</div>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('mow-auth');
+  if (saved) {
+    state.user = JSON.parse(saved);
+  }
+  if (!localStorage.getItem('mow-clients')) {
+    saveClients(SEED_CLIENTS);
+  }
+  render();
+});
   </script>
 </body>
 </html>
