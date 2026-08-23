@@ -1,7 +1,7 @@
 // Auth Components - Login, Biometric Setup, Remember Device
 // Loaded as global window.LoginPage, window.BiometricSetupPage, window.RememberDevicePrompt
 
-const React = window.React || require('react');
+const React = window.React;
 const { useState } = React;
 
 // LoginPage Component
