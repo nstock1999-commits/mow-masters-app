@@ -255,7 +255,12 @@ const styles = {
     color: '#c53030',
     padding: '12px 16px',
     borderRadius: '8px',
-   // Initialize after React loads via importmap (with retry loop)
+    marginBottom: '16px',
+    fontSize: '14px'
+  }
+};
+
+// Initialize after React loads via importmap (with retry loop)
 function tryInitAuthComponents() {
   if (window.React) {
     initAuthComponents();
