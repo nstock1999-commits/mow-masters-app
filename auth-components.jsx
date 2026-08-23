@@ -1,173 +1,178 @@
 // Auth Components - Login, Biometric Setup, Remember Device
 // Loaded as global window.LoginPage, window.BiometricSetupPage, window.RememberDevicePrompt
+// These will be initialized after React loads via importmap
 
-const React = window.React;
-const { useState } = React;
+function initAuthComponents() {
+  const React = window.React;
+  const { useState } = React;
 
-// LoginPage Component
-window.LoginPage = function LoginPage({ onLoginSuccess, error }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState('login'); // 'login' or 'signup'
+  // LoginPage Component
+  window.LoginPage = function LoginPage({ onLoginSuccess, error }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [mode, setMode] = useState('login'); // 'login' or 'signup'
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
 
-    try {
-      let result;
-      if (mode === 'signup') {
-        result = await window.authModule.supabase.signUp(email, password);
-      } else {
-        result = await window.authModule.supabase.signIn(email, password);
+      try {
+        let result;
+        if (mode === 'signup') {
+          result = await window.authModule.supabase.signUp(email, password);
+        } else {
+          result = await window.authModule.supabase.signIn(email, password);
+        }
+
+        if (result.error) {
+          alert('Auth error: ' + result.error);
+        } else {
+          onLoginSuccess(result.user);
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      if (result.error) {
-        alert('Auth error: ' + result.error);
-      } else {
-        onLoginSuccess(result.user);
-      }
-    } catch (err) {
-      alert('Error: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return React.createElement('div', { style: styles.container },
+      React.createElement('div', { style: styles.card },
+        React.createElement('h1', { style: styles.title }, 'Mow Masters of Edmond'),
+        React.createElement('p', { style: styles.subtitle }, 'Professional Lawn Care Management'),
 
-  return React.createElement('div', { style: styles.container },
-    React.createElement('div', { style: styles.card },
-      React.createElement('h1', { style: styles.title }, 'Mow Masters of Edmond'),
-      React.createElement('p', { style: styles.subtitle }, 'Professional Lawn Care Management'),
+        error && React.createElement('div', { style: styles.error }, error),
 
-      error && React.createElement('div', { style: styles.error }, error),
+        React.createElement('form', { onSubmit: handleSubmit, style: styles.form },
+          React.createElement('input', {
+            type: 'email',
+            placeholder: 'Email',
+            value: email,
+            onChange: (e) => setEmail(e.target.value),
+            required: true,
+            style: styles.input
+          }),
+          React.createElement('input', {
+            type: 'password',
+            placeholder: 'Password',
+            value: password,
+            onChange: (e) => setPassword(e.target.value),
+            required: true,
+            style: styles.input
+          }),
+          React.createElement('button', {
+            type: 'submit',
+            disabled: loading,
+            style: { ...styles.button, opacity: loading ? 0.6 : 1 }
+          }, loading ? 'Signing in...' : (mode === 'signup' ? 'Sign Up' : 'Login'))
+        ),
 
-      React.createElement('form', { onSubmit: handleSubmit, style: styles.form },
-        React.createElement('input', {
-          type: 'email',
-          placeholder: 'Email',
-          value: email,
-          onChange: (e) => setEmail(e.target.value),
-          required: true,
-          style: styles.input
-        }),
-        React.createElement('input', {
-          type: 'password',
-          placeholder: 'Password',
-          value: password,
-          onChange: (e) => setPassword(e.target.value),
-          required: true,
-          style: styles.input
-        }),
+        React.createElement('div', { style: styles.divider }, 'OR'),
+
         React.createElement('button', {
-          type: 'submit',
-          disabled: loading,
-          style: { ...styles.button, opacity: loading ? 0.6 : 1 }
-        }, loading ? 'Signing in...' : (mode === 'signup' ? 'Sign Up' : 'Login'))
-      ),
-
-      React.createElement('div', { style: styles.divider }, 'OR'),
-
-      React.createElement('button', {
-        onClick: () => setMode(mode === 'signup' ? 'login' : 'signup'),
-        style: styles.secondaryButton
-      }, mode === 'signup' ? 'Already have an account? Login' : "Don't have an account? Sign up")
-    )
-  );
-};
-
-// BiometricSetupPage Component
-window.BiometricSetupPage = function BiometricSetupPage({ userId, onComplete }) {
-  const [loading, setLoading] = useState(false);
-
-  const handleFaceID = async () => {
-    setLoading(true);
-    try {
-      await window.authModule.setupFaceID(userId);
-      onComplete();
-    } catch (err) {
-      alert('Face ID setup failed: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+          onClick: () => setMode(mode === 'signup' ? 'login' : 'signup'),
+          style: styles.secondaryButton
+        }, mode === 'signup' ? 'Already have an account? Login' : "Don't have an account? Sign up")
+      )
+    );
   };
 
-  const handlePIN = async () => {
-    setLoading(true);
-    try {
-      const pin = prompt('Enter a 4-digit PIN:');
-      if (pin && pin.length >= 4) {
-        await window.authModule.setupPIN(userId, pin);
+  // BiometricSetupPage Component
+  window.BiometricSetupPage = function BiometricSetupPage({ userId, onComplete }) {
+    const [loading, setLoading] = useState(false);
+
+    const handleFaceID = async () => {
+      setLoading(true);
+      try {
+        await window.authModule.setupFaceID(userId);
         onComplete();
+      } catch (err) {
+        alert('Face ID setup failed: ' + err.message);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      alert('PIN setup failed: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  return React.createElement('div', { style: styles.container },
-    React.createElement('div', { style: styles.card },
-      React.createElement('h2', { style: styles.title }, 'Set Up Security'),
-      React.createElement('p', { style: styles.subtitle }, 'Choose how to unlock your app'),
+    const handlePIN = async () => {
+      setLoading(true);
+      try {
+        const pin = prompt('Enter a 4-digit PIN:');
+        if (pin && pin.length >= 4) {
+          await window.authModule.setupPIN(userId, pin);
+          onComplete();
+        }
+      } catch (err) {
+        alert('PIN setup failed: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      React.createElement('div', { style: styles.buttonGroup },
-        React.createElement('button', {
-          onClick: handleFaceID,
-          disabled: loading,
-          style: { ...styles.button, ...styles.primaryButton }
-        }, '📱 Set Up Face ID'),
-        React.createElement('button', {
-          onClick: handlePIN,
-          disabled: loading,
-          style: { ...styles.button, ...styles.primaryButton }
-        }, '🔐 Set Up PIN'),
-        React.createElement('button', {
-          onClick: onComplete,
-          disabled: loading,
-          style: { ...styles.button, ...styles.secondaryButton }
-        }, 'Skip for Now')
+    return React.createElement('div', { style: styles.container },
+      React.createElement('div', { style: styles.card },
+        React.createElement('h2', { style: styles.title }, 'Set Up Security'),
+        React.createElement('p', { style: styles.subtitle }, 'Choose how to unlock your app'),
+
+        React.createElement('div', { style: styles.buttonGroup },
+          React.createElement('button', {
+            onClick: handleFaceID,
+            disabled: loading,
+            style: { ...styles.button, ...styles.primaryButton }
+          }, '📱 Set Up Face ID'),
+          React.createElement('button', {
+            onClick: handlePIN,
+            disabled: loading,
+            style: { ...styles.button, ...styles.primaryButton }
+          }, '🔐 Set Up PIN'),
+          React.createElement('button', {
+            onClick: onComplete,
+            disabled: loading,
+            style: { ...styles.button, ...styles.secondaryButton }
+          }, 'Skip for Now')
+        )
       )
-    )
-  );
-};
-
-// RememberDevicePrompt Component
-window.RememberDevicePrompt = function RememberDevicePrompt({ onConfirm, onDecline }) {
-  const [loading, setLoading] = useState(false);
-
-  const handleYes = async () => {
-    setLoading(true);
-    const token = Math.random().toString(36).substr(2, 9);
-    onConfirm(token);
+    );
   };
 
-  const handleNo = () => {
-    setLoading(true);
-    onDecline();
-  };
+  // RememberDevicePrompt Component
+  window.RememberDevicePrompt = function RememberDevicePrompt({ onConfirm, onDecline }) {
+    const [loading, setLoading] = useState(false);
 
-  return React.createElement('div', { style: styles.container },
-    React.createElement('div', { style: styles.card },
-      React.createElement('h2', { style: styles.title }, 'Remember This Device?'),
-      React.createElement('p', { style: styles.subtitle }, 'Stay logged in for 24 hours'),
+    const handleYes = async () => {
+      setLoading(true);
+      const token = Math.random().toString(36).substr(2, 9);
+      onConfirm(token);
+    };
 
-      React.createElement('div', { style: styles.buttonGroup },
-        React.createElement('button', {
-          onClick: handleYes,
-          disabled: loading,
-          style: { ...styles.button, ...styles.primaryButton, background: '#10b981' }
-        }, '✓ Yes, Remember'),
-        React.createElement('button', {
-          onClick: handleNo,
-          disabled: loading,
-          style: { ...styles.button, ...styles.secondaryButton }
-        }, '✗ No, Ask Again')
+    const handleNo = () => {
+      setLoading(true);
+      onDecline();
+    };
+
+    return React.createElement('div', { style: styles.container },
+      React.createElement('div', { style: styles.card },
+        React.createElement('h2', { style: styles.title }, 'Remember This Device?'),
+        React.createElement('p', { style: styles.subtitle }, 'Stay logged in for 24 hours'),
+
+        React.createElement('div', { style: styles.buttonGroup },
+          React.createElement('button', {
+            onClick: handleYes,
+            disabled: loading,
+            style: { ...styles.button, ...styles.primaryButton, background: '#10b981' }
+          }, '✓ Yes, Remember'),
+          React.createElement('button', {
+            onClick: handleNo,
+            disabled: loading,
+            style: { ...styles.button, ...styles.secondaryButton }
+          }, '✗ No, Ask Again')
+        )
       )
-    )
-  );
-};
+    );
+  };
+
+  console.log('[Auth Components] Loaded');
+}
 
 // Shared Styles
 const styles = {
@@ -255,4 +260,9 @@ const styles = {
   }
 };
 
-console.log('[Auth Components] Loaded');
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAuthComponents);
+} else {
+  initAuthComponents();
+}
