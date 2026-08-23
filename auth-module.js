@@ -1,61 +1,102 @@
-// Auth Module - Supabase Authentication Client
-// Handles login, biometric setup, device memory, and logout
+
+// Auth Module - Real Supabase Integration
+// Handles login, signup, and session management with actual Supabase backend
+
+const SUPABASE_URL = 'https://bmkmwfsnwyhspvzoebid.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_wnSj7t3rsjLC5B1wlrXE4w_FtsPvYnG';
 
 window.authModule = {
   supabase: {
-    // Mock user session (replace with real Supabase if needed)
     _session: null,
     _user: null,
 
     async signUp(email, password) {
-      // Simulate signup
-      const user = {
-        id: 'user_' + Math.random().toString(36).substr(2, 9),
-        email: email,
-        createdAt: new Date().toISOString()
-      };
-      this._user = user;
-      this._session = { user, token: Math.random().toString(36) };
-      localStorage.setItem('auth_session', JSON.stringify(this._session));
-      return { user, error: null };
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          return { user: null, error: data.message || 'Signup failed' };
+        }
+
+        this._user = data.user;
+        this._session = { user: data.user, access_token: data.session?.access_token };
+        localStorage.setItem('auth_session', JSON.stringify(this._session));
+        return { user: data.user, error: null };
+      } catch (err) {
+        return { user: null, error: err.message };
+      }
     },
 
     async signIn(email, password) {
-      // Simulate login
-      const stored = localStorage.getItem('auth_users');
-      const users = stored ? JSON.parse(stored) : [];
-      const user = users.find(u => u.email === email);
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ email, password })
+        });
 
-      if (!user) {
-        // Create new user on first login
-        const newUser = {
-          id: 'user_' + Math.random().toString(36).substr(2, 9),
-          email: email,
-          password: password,
-          createdAt: new Date().toISOString()
-        };
-        users.push(newUser);
-        localStorage.setItem('auth_users', JSON.stringify(users));
-        this._user = newUser;
-      } else {
-        this._user = user;
+        const data = await response.json();
+
+        if (!response.ok) {
+          return { user: null, error: data.error_description || 'Login failed' };
+        }
+
+        this._user = data.user;
+        this._session = { user: data.user, access_token: data.access_token };
+        localStorage.setItem('auth_session', JSON.stringify(this._session));
+        return { user: data.user, error: null };
+      } catch (err) {
+        return { user: null, error: err.message };
       }
-
-      this._session = { user: this._user, token: Math.random().toString(36) };
-      localStorage.setItem('auth_session', JSON.stringify(this._session));
-      return { user: this._user, error: null };
     },
 
     async signOut() {
-      this._session = null;
-      this._user = null;
-      localStorage.removeItem('auth_session');
-      return { error: null };
+      try {
+        if (this._session?.access_token) {
+          await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${this._session.access_token}`
+            }
+          });
+        }
+        this._session = null;
+        this._user = null;
+        localStorage.removeItem('auth_session');
+        return { error: null };
+      } catch (err) {
+        this._session = null;
+        this._user = null;
+        localStorage.removeItem('auth_session');
+        return { error: null };
+      }
     },
 
     getSession() {
       const stored = localStorage.getItem('auth_session');
-      return stored ? JSON.parse(stored) : null;
+      if (stored) {
+        try {
+          this._session = JSON.parse(stored);
+          return this._session;
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
     },
 
     getUserId() {
@@ -66,7 +107,7 @@ window.authModule = {
   },
 
   // Device Memory (24h auto-login)
-  setDeviceMemory(token, expirationMs = 86400000) { // 24h default
+  setDeviceMemory(token, expirationMs = 86400000) {
     const deviceMemory = {
       token: token,
       expiresAt: Date.now() + expirationMs
@@ -78,34 +119,34 @@ window.authModule = {
     const stored = localStorage.getItem('device-memory');
     if (!stored) return null;
 
-    const deviceMemory = JSON.parse(stored);
-    if (Date.now() > deviceMemory.expiresAt) {
-      localStorage.removeItem('device-memory');
+    try {
+      const deviceMemory = JSON.parse(stored);
+      if (Date.now() > deviceMemory.expiresAt) {
+        localStorage.removeItem('device-memory');
+        return null;
+      }
+      return deviceMemory.token;
+    } catch (e) {
       return null;
     }
-    return deviceMemory.token;
   },
 
   clearDeviceMemory() {
     localStorage.removeItem('device-memory');
   },
 
-  // Biometric Setup
+  // Biometric Setup (placeholder - would use WebAuthn in production)
   async setupFaceID(userId) {
-    // Check if WebAuthn is available
     if (!window.PublicKeyCredential) {
       return { error: 'WebAuthn not available' };
     }
-
-    // Store that Face ID was set up
     localStorage.setItem(`biometric_${userId}_faceID`, 'true');
     return { success: true };
   },
 
   async setupPIN(userId, pin) {
-    // Hash and store PIN (simplified - use bcrypt in production)
-    const pinHash = Math.random().toString(36).substr(2, 9);
-    localStorage.setItem(`biometric_${userId}_pin`, pinHash);
+    // In production, hash and store securely on backend
+    localStorage.setItem(`biometric_${userId}_pin`, 'set');
     return { success: true };
   },
 
@@ -115,4 +156,4 @@ window.authModule = {
   }
 };
 
-console.log('[Auth Module] Initialized');
+console.log('[Auth Module] Initialized with Supabase');
