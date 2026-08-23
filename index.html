@@ -41,28 +41,14 @@
 <body>
   <div id="root"></div>
 
-  <!-- Storage Shim (Supabase backend compatibility) -->
+  <!-- Storage Shim -->
   <script src="storage-shim.js"></script>
 
-  <!-- Auth Module (Supabase auth client) -->
+  <!-- Auth Module -->
   <script src="auth-module.js"></script>
 
-  <!-- Auth Components (Login, Biometric, RememberDevice) -->
-  <script src="auth-components.jsx"></script>
-
-  <!-- React & ReactDOM from CDN -->
-  <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react-dom": "https://esm.sh/react-dom@18.2.0/client",
-        "lucide-react": "https://esm.sh/lucide-react@0.263.1"
-      }
-    }
-  </script>
-
-  <!-- Main App -->
-  <script type="module" src="app.js"></script>
+  <!-- App -->
+  <script src="app.js"></script>
 
   <!-- Service Worker Registration -->
   <script>
