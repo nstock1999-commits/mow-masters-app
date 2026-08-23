@@ -1,3 +1,4 @@
+
 // Mow Masters App - Vanilla JavaScript (No React Complexity)
 
 // ========== AUTH STATE ==========
@@ -19,7 +20,10 @@ function renderLoginPage() {
 
         <form id="loginForm" style="display: flex; flex-direction: column; gap: 12px;">
           <input type="email" id="email" placeholder="Email" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: 'Inter', system-ui, sans-serif;">
-          <input type="password" id="password" placeholder="Password" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: 'Inter', system-ui, sans-serif;">
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="password" placeholder="Password" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: 'Inter', system-ui, sans-serif; width: 100%;">
+            <button type="button" id="togglePassword" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; font-size: 18px; padding: 0;">👁️</button>
+          </div>
           <button type="submit" id="submitBtn" style="padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; background: #667eea; color: white;">Login</button>
         </form>
 
@@ -36,11 +40,23 @@ function renderLoginPage() {
   const toggleBtn = document.getElementById('toggleMode');
   const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
+  const togglePasswordBtn = document.getElementById('togglePassword');
 
   toggleBtn.addEventListener('click', () => {
     isSignUp = !isSignUp;
     submitBtn.textContent = isSignUp ? 'Sign Up' : 'Login';
     toggleBtn.textContent = isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign up";
+  });
+
+  togglePasswordBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      togglePasswordBtn.textContent = '🙈';
+    } else {
+      passwordInput.type = 'password';
+      togglePasswordBtn.textContent = '👁️';
+    }
   });
 
   form.addEventListener('submit', async (e) => {
